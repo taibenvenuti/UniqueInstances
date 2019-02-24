@@ -6,12 +6,20 @@ namespace UniqueInstances
 {
     public static partial class Extensions
     {
-        public static BuildingInfo GetImmediateCopy(this BuildingInfo building, string newName)
+        public static UniqueBuilding GetImmediateCopy(this BuildingInfo oldInfo, string newName, string newDescription = "", ushort buildingID = 0)
         {
-            building.CopyInfo(newName);
+            string oldName = oldInfo.name;
+            oldInfo.CopyInfo(newName);
             PrefabCollection<BuildingInfo>.BindPrefabs();
-            building.CopyFields(newName);
-            return PrefabCollection<BuildingInfo>.FindLoaded(newName);
+            oldInfo.CopyFields(newName);
+            BuildingInfo newInfo = PrefabCollection<BuildingInfo>.FindLoaded(newName);
+            if (buildingID != 0)
+            {
+                BuildingManager.instance.m_buildings.m_buffer[buildingID].Info = newInfo;
+                BuildingManager.instance.UpdateBuildingRenderer(buildingID, true);
+                BuildingManager.instance.UpdateBuildingInfo(buildingID, newInfo);
+            }
+            return new UniqueBuilding(newInfo, oldName, newName, newDescription);
         }
 
         public static void CopyInfo(this BuildingInfo oldInfo, string newName)

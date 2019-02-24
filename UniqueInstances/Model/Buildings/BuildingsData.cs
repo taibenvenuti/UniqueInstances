@@ -7,45 +7,43 @@ namespace UniqueInstances
     [Serializable]
     public class BuildingsData : IEnumerable<UniqueBuilding>
     {
-        private Dictionary<string, UniqueBuilding> Buffer { get; set; }
+        private Dictionary<string, UniqueBuilding> InfoBuffer { get; set; }
 
         public BuildingsData()
         {
-            Buffer = new Dictionary<string, UniqueBuilding>();
+            InfoBuffer = new Dictionary<string, UniqueBuilding>();
         }
 
         public bool Contains(UniqueBuilding uniqueBuilding)
         {
-            return uniqueBuilding != null && Buffer.ContainsKey(uniqueBuilding.UniqueName);
+            return uniqueBuilding != null && InfoBuffer.ContainsKey(uniqueBuilding.UniqueName);
         }
 
         public void Add(UniqueBuilding uniqueBuilding, bool replace = false)
         {
-            string id = uniqueBuilding.UniqueName;
+            string uniqueName = uniqueBuilding.UniqueName;
 
-            if (!Buffer.ContainsKey(id))
+            if (!InfoBuffer.ContainsKey(uniqueName))
             {
-                Buffer.Add(id, uniqueBuilding);
+                InfoBuffer.Add(uniqueName, uniqueBuilding);
             }
-            if (replace) Buffer[id] = uniqueBuilding;
+            else if (replace) InfoBuffer[uniqueName] = uniqueBuilding;
         }
 
-        public void Remove(UniqueBuilding uniqueBuilding)
+        public void Remove(string uniqueName)
         {
-            string id = uniqueBuilding.UniqueName;
-
-            if (Buffer.ContainsKey(id))
-                Buffer.Remove(id);
+            if (InfoBuffer.ContainsKey(uniqueName))
+                InfoBuffer.Remove(uniqueName);
         }
 
         public UniqueBuilding Get(string uniqueNme)
         {
-            return Buffer.ContainsKey(uniqueNme) ? null : Buffer[uniqueNme];
+            return InfoBuffer.ContainsKey(uniqueNme) ? null : InfoBuffer[uniqueNme];
         }
 
         public IEnumerator<UniqueBuilding> GetEnumerator()
         {
-            return Buffer.Values.GetEnumerator();
+            return InfoBuffer.Values.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

@@ -6,9 +6,9 @@ namespace UniqueInstances
 {
     public class Mod : LoadingExtensionBase, IUserMod
     {
-        public string Name => "Unique Instances";
-        public string Description => "Allows customization of buildings and trees on a per-instance basis.";
-        private const string UniqueName = "UniqueInstancesMod";
+        public string Name => "Unique";
+        public string Description => "Allows customization of prefabs on a per-instance basis.";
+        private const string UniqueName = "UniqueMod";
         private GameObject GameObject { get; set; }
         private bool Initialized;
 

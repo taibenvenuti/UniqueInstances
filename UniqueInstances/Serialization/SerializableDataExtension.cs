@@ -7,7 +7,7 @@ namespace UniqueInstances
     public class SerializableDataExtension : SerializableDataExtensionBase
     {
         private const string DATA_ID = "Unique_Instances_DATA";
-        public InstancesData Data { get => Manager.Instance.InstancesData; set => Manager.Instance.InstancesData = value; }
+        public Data.SerializableInstances InstancesData { get => Manager.Instance.Data.GetSerializableInstances(); set => Manager.Instance.Data.LoadDeserializedInstances(value); }
 
         public override void OnSaveData()
         {
@@ -16,7 +16,7 @@ namespace UniqueInstances
             using (var memoryStream = new MemoryStream())
             {
                 var binaryFormatter = new BinaryFormatter();
-                binaryFormatter.Serialize(memoryStream, Data);
+                binaryFormatter.Serialize(memoryStream, InstancesData);
                 serializableDataManager.SaveData(DATA_ID, memoryStream.ToArray());
             }
         }
@@ -30,7 +30,7 @@ namespace UniqueInstances
 
             using (var memoryStream = new MemoryStream(data))
             {
-                Data = binaryFormatter.Deserialize(memoryStream) as InstancesData;
+                InstancesData = binaryFormatter.Deserialize(memoryStream) as Data.SerializableInstances;
             }
         }
     }

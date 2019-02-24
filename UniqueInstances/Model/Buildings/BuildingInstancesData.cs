@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace UniqueInstances
 {
@@ -25,8 +26,15 @@ namespace UniqueInstances
         {
             if (!Buffer.ContainsKey(buildingID))
                 Buffer.Add(buildingID, new UniqueBuildingInstance(buildingID, uniqueBuilding));
-            if (replace)
+            else if (replace)
                 Buffer[buildingID] = new UniqueBuildingInstance(buildingID, uniqueBuilding);
+        }
+
+        public bool Remove(ushort buildingID)
+        {
+            if (Buffer.Remove(buildingID))
+                return true;
+            return false;
         }
 
         public UniqueBuildingInstance Get(ushort buildingID)

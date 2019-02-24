@@ -18,7 +18,11 @@ namespace UniqueInstances
             Flags = Building.Flags.Created;
         }
 
-        internal void Load()
+        /// <summary>
+        /// Must be called after Data has been initialized.
+        /// Sets the custom unique BuildinInfo to a Building instance.
+        /// </summary>
+        public void Load()
         {
             BuildingManager.instance.m_buildings.m_buffer[BuildingID].Info = PrefabCollection<BuildingInfo>.FindLoaded(UniqueName);
         }

@@ -12,15 +12,18 @@ namespace UniqueInstances
         public UniqueTreeInfo UniqueInfo { get; private set; }
         public Randomizer Randomizer { get; set; }
 
-        public UniqueTree(string oldName, string newName, string newDescription)
+        public UniqueTree(TreeInfo newInfo, string oldName, string newName, string newDescription)
         {
             UniqueName = newName;
             UniqueDescription = newDescription;
             OriginalName = oldName;
-            TreeInfo info = PrefabCollection<TreeInfo>.FindLoaded(newName);
-            UniqueInfo = new UniqueTreeInfo(info);
+            UniqueInfo = new UniqueTreeInfo(newInfo);
         }
 
+        /// <summary>
+        /// Must be called after Data has been initialized.
+        /// Sets saved custom 'properties' to a unique TreeInfo.
+        /// </summary>
         public void Load()
         {
             UniqueInfo.Load(PrefabCollection<TreeInfo>.FindLoaded(UniqueName));

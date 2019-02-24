@@ -12,15 +12,18 @@ namespace UniqueInstances
         public UniqueBuildingInfo UniqueInfo { get; private set; }
         public Randomizer Randomizer { get; set; }
 
-        public UniqueBuilding(string oldName, string newName, string newDescription)
+        public UniqueBuilding(BuildingInfo newInfo, string oldName, string newName, string newDescription)
         {
             UniqueName = newName;
             UniqueDescription = newDescription;
             OriginalName = oldName;
-            BuildingInfo info = PrefabCollection<BuildingInfo>.FindLoaded(newName);
-            UniqueInfo = new UniqueBuildingInfo(info);
+            UniqueInfo = new UniqueBuildingInfo(newInfo);
         }
 
+        /// <summary>
+        /// Must be called after Data has been initialized.
+        /// Sets saved custom 'properties' to a unique BuildingInfo.
+        /// </summary>
         public void Load()
         {
             UniqueInfo.Load(PrefabCollection<BuildingInfo>.FindLoaded(UniqueName));

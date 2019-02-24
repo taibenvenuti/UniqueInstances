@@ -6,21 +6,22 @@ using ColossalFramework.IO;
 
 namespace UniqueInstances
 {
-    public class Serializer
+    public class ByteSerializer
     {
-        private static string ConfigurationPath => Path.Combine(DataLocation.localApplicationData, "UniqueInstances.udt");
+        private const string FileName = "Unique.idt";
+        private static string FilePath => Path.Combine(DataLocation.localApplicationData, FileName);
 
-        public static Data UniqueData { get => Manager.Instance.Data; private set =>  Manager.Instance.Data = value; }
+        public static Data.SerializableInfos InfosData { get => Manager.Instance.Data.GetSerializableInfos(); private set =>  Manager.Instance.Data.LoadDeserializedInfos(value); }
 
         internal static bool Save()
         {
-            string path = ConfigurationPath;
+            string path = FilePath;
             BinaryFormatter binaryFormatter = new BinaryFormatter();
             using (MemoryStream memoryStream = new MemoryStream())
             {
                 try
                 {
-                    binaryFormatter.Serialize(memoryStream, UniqueData);
+                    binaryFormatter.Serialize(memoryStream, InfosData);
                     byte[] bytes = memoryStream.ToArray();
                     File.WriteAllBytes(path, bytes);
                 }
@@ -31,15 +32,16 @@ namespace UniqueInstances
                 }
                 finally
                 {
+                    Debug.Log($"Successfully saved {InfosData.GetType().Name} to {FilePath}");
                 }
                 return true;
             }
         }
         internal static void Load()
         {
-            string path = ConfigurationPath;
+            string path = FilePath;
             byte[] array = File.ReadAllBytes(path);
-            Data uniqueData = null;
+            Data.SerializableInfos uniqueData = null;
             using (MemoryStream memoryStream = new MemoryStream())
             {
                 BinaryFormatter binaryFormatter = new BinaryFormatter();
@@ -47,7 +49,7 @@ namespace UniqueInstances
                 {
                     memoryStream.Write(array, 0, array.Length);
                     memoryStream.Seek(0L, SeekOrigin.Begin);
-                    uniqueData = (Data)binaryFormatter.Deserialize(memoryStream);
+                    uniqueData = (Data.SerializableInfos)binaryFormatter.Deserialize(memoryStream);
                 }
                 catch (Exception exception)
                 {
@@ -55,8 +57,8 @@ namespace UniqueInstances
                 }
                 finally
                 {
-                    if (uniqueData == null) UniqueData = new Data();
-                    else UniqueData = uniqueData;
+                    if (uniqueData == null) InfosData = new Data.SerializableInfos(Manager.Instance.Data);
+                    else InfosData = uniqueData;
                 }
             }
         }

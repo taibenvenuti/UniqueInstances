@@ -7,40 +7,38 @@ namespace UniqueInstances
     [Serializable]
     public class TreesData : IEnumerable<UniqueTree>
     {
-        private Dictionary<ulong, UniqueTree> Buffer { get; set; }
+        private Dictionary<string, UniqueTree> Buffer { get; set; }
 
-        private TreesData()
+        public TreesData()
         {
-            Buffer = new Dictionary<ulong, UniqueTree>();
+            Buffer = new Dictionary<string, UniqueTree>();
         }
 
         public bool Contains(UniqueTree uniqueTree)
         {
-            return uniqueTree != null && uniqueTree.UniqueID != 0 && Buffer.ContainsKey(uniqueTree.UniqueID);
+            return uniqueTree != null && Buffer.ContainsKey(uniqueTree.UniqueName);
         }
 
         public void Add(UniqueTree uniqueTree, bool replace = false)
         {
-            ulong id = uniqueTree.UniqueID;
+            string id = uniqueTree.UniqueName;
 
             if (!Buffer.ContainsKey(id))
             {
                 Buffer.Add(id, uniqueTree);
             }
-            if (replace) Buffer[id] = uniqueTree;
+            else if (replace) Buffer[id] = uniqueTree;
         }
 
-        public void Remove(UniqueTree uniqueTree)
+        public void Remove(string uniqueName)
         {
-            ulong id = uniqueTree.UniqueID;
-
-            if (Buffer.ContainsKey(id))
-                Buffer.Remove(id);
+            if (Buffer.ContainsKey(uniqueName))
+                Buffer.Remove(uniqueName);
         }
 
-        public UniqueTree Get(ulong uniqueID)
+        public UniqueTree Get(string uniqueName)
         {
-            return uniqueID == 0 || Buffer.ContainsKey(uniqueID) ? null : Buffer[uniqueID];
+            return Buffer.ContainsKey(uniqueName) ? null : Buffer[uniqueName];
         }
 
         public IEnumerator<UniqueTree> GetEnumerator()

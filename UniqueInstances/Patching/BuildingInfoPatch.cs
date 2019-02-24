@@ -2,12 +2,13 @@
 
 namespace UniqueInstances
 {
-    [HarmonyPatch(typeof(LoadingManager), "LoadLevelComplete")]
-    public class BuildingInfoPatch
+    [HarmonyPatch(typeof(LoadingManager), "LoadLevelCoroutine")]
+    public class LoadingManagerPatch
     {
         static bool Prefix()
         {
 
+            return true;
         }
     }
 }

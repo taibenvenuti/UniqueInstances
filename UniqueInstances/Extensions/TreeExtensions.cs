@@ -6,12 +6,21 @@ namespace UniqueInstances
 {
     public static partial class Extensions
     {
-        public static TreeInfo GetImmediateCopy(this TreeInfo tree, string newName)
+        public static UniqueTree GetImmediateCopy(this TreeInfo tree, string newName, string newDescription = "", uint treeID = 0)
         {
+            string oldName = tree.name;
             tree.CopyInfo(newName);
             PrefabCollection<BuildingInfo>.BindPrefabs();
             tree.CopyFields(newName);
-            return PrefabCollection<TreeInfo>.FindLoaded(newName);
+            TreeInfo newInfo = PrefabCollection<TreeInfo>.FindLoaded(newName);
+            if (treeID != 0)
+            {
+                TreeManager.instance.m_trees.m_buffer[treeID].Info = newInfo;
+                TreeManager.instance.m_trees.m_buffer[treeID].UpdateTree(treeID);
+                TreeManager.instance.UpdateTreeRenderer(treeID, true);
+                TreeManager.instance.UpdateTree(treeID);
+            }
+            return new UniqueTree(newInfo, oldName, newName, newDescription);
         }
 
         public static void CopyInfo(this TreeInfo oldInfo, string newName)

@@ -19,14 +19,15 @@ namespace UniqueInstances
         {
             if (!Buffer.ContainsKey(treeID))
                 Buffer.Add(treeID, new UniqueTreeInstance(treeID, uniqueTree));
-            if (replace)
+            else if (replace)
                 Buffer[treeID] = new UniqueTreeInstance(treeID, uniqueTree);
         }
 
-        public void Remove(uint treeID)
+        public bool Remove(uint treeID)
         {
-            if (Buffer.ContainsKey(treeID))
-                Buffer.Remove(treeID);
+            if (Buffer.Remove(treeID))
+                return true;
+            return false;
         }
 
         public UniqueTreeInstance Get(uint treeID)

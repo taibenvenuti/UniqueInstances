@@ -11,18 +11,17 @@ namespace UniqueInstances
     {
         public static Manager Instance;
         public Data Data { get; set; }
-        public InstancesData InstancesData { get; set; }
         private UniqueInstancesTool Tool { get; set; }
         private bool Active { get; set; }
-        private uint TreeId { get; set; }
         private object PrefabLock { get; set; }
 
         void Awake()
         {
             Instance = this;
             PrefabLock = new object();
-            Serializer.Load();
+            ByteSerializer.Load();
             InstallTool();
+            InitializeData();
         }
 
         void OnDestroy()
@@ -30,7 +29,8 @@ namespace UniqueInstances
             UninstallTool();
         }
 
-        internal void MakeUnique(InstanceID hoverInstance, bool v)
+        //TODO Name/Desc input UI
+        internal void MakeUnique(InstanceID hoverInstance, bool create)
         {
             while (!Monitor.TryEnter(PrefabLock, SimulationManager.SYNCHRONIZE_TIMEOUT)) { }
             try
@@ -38,9 +38,9 @@ namespace UniqueInstances
                 if (!Active)
                 {
                     if (hoverInstance.Building != 0)
-                        MakeUnique(hoverInstance.Building, v);
+                        MakeUnique(hoverInstance.Building, "TEST_NAME", "TEST_DESCRIPTION", create);
                     else if (hoverInstance.Tree != 0)
-                        MakeUnique(hoverInstance.Tree, v);
+                        MakeUnique(hoverInstance.Tree, "TEST_NAME", "TEST_DESCRIPTION", create);
                     Active = true;
                 } 
             }
@@ -55,22 +55,26 @@ namespace UniqueInstances
             }
         }
 
-        private void MakeUnique(ushort buildingID, bool state)
+        private void MakeUnique(ushort buildingID, string newName, string newDescription = "", bool create = true)
         {
-
+            if (create)
+                Data.CreateUniqueInstance(buildingID, newName, newDescription);
+            else Data.RemoveInstance(buildingID);
         }
 
-        private void MakeUnique(uint treeID, bool state)
+        private void MakeUnique(uint treeID, string newName, string newDescription = "", bool create = true)
         {
-
+            if (create)
+                Data.CreateUniqueInstance(treeID, newName, newDescription);
+            else Data.RemoveInstance(treeID);
         }
 
-        internal bool IsUnique(InstanceID instanceID)
+        public bool IsUnique(InstanceID instanceID)
         {
             if (instanceID.Building != 0)
-                return InstancesData.Buildings.Contains(instanceID.Building);
+                return Data.ContainsInstance(instanceID.Building);
             if (instanceID.Tree != 0)
-                return InstancesData.Trees.Contains(instanceID.Tree);
+                return Data.ContainsInstance(instanceID.Tree);
             return false;
         }
 
@@ -104,68 +108,12 @@ namespace UniqueInstances
             while (!Monitor.TryEnter(PrefabLock, SimulationManager.SYNCHRONIZE_TIMEOUT)) { }
             try
             {
-                InitializeBuildings();
-                InitializeTrees();
+                Data.InitializeBuildings();
+                Data.InitializeTrees();
             }
             finally
             {
                 Monitor.Exit(PrefabLock);
-            }
-        }
-
-        private void InitializeBuildings()
-        {
-            //Create the new infos
-            foreach (var uniqueBuilding in Data.Buildings)
-            {
-                uniqueBuilding.CreateCopy();
-            }
-
-            //Bind new copies to prefab collection
-            PrefabCollection<BuildingInfo>.BindPrefabs();
-
-            //Copy fields from old info to new info, then overwrite with saved custom values
-            foreach (var uniqueBuilding in Data.Buildings)
-            {
-                uniqueBuilding.CopyFields();
-                uniqueBuilding.Load();
-            }
-
-            //Set new infos on buildin instances
-            foreach (var buildingInstance  in InstancesData.Buildings)
-            {
-                if ((buildingInstance.Flags & Building.Flags.Created) != 0)
-                {
-                    buildingInstance.Load();
-                }
-            }
-        }
-
-        private void InitializeTrees()
-        {
-            //Create the new infos
-            foreach (var uniqueTree in Data.Trees)
-            {
-                uniqueTree.CreateCopy();
-            }
-
-            //Bind new copies to prefab collection
-            PrefabCollection<TreeInfo>.BindPrefabs();
-
-            //Copy fields from old info to new info, then overwrite with saved custom values
-            foreach (var uniqueTree in Data.Trees)
-            {
-                uniqueTree.CopyFields();
-                uniqueTree.Load();
-            }
-
-            //Set new infos on buildin instances
-            foreach (var treeInstance in InstancesData.Trees)
-            {
-                if ((treeInstance.Flags & TreeInstance.Flags.Created) != 0)
-                {
-                    treeInstance.Load();
-                }
             }
         }
     }
