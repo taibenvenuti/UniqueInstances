@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace UniqueInstances.Extensions
+namespace UniqueInstances
 {
     public static partial class Extensions
     {

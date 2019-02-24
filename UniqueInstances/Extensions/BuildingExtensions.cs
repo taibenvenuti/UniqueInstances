@@ -1,47 +1,56 @@
 ﻿using System;
 using System.Reflection;
 using static UnityEngine.Object;
-using UniqueInstances.Data.Buildings;
 
-namespace UniqueInstances.Extensions
+namespace UniqueInstances
 {
     public static partial class Extensions
     {
-        public static BuildingInfo GetCopyOf(this Building building, string newUniqueName)
+        public static BuildingInfo GetImmediateCopy(this BuildingInfo building, string newName)
+        {
+            building.CopyInfo(newName);
+            PrefabCollection<BuildingInfo>.BindPrefabs();
+            building.CopyFields(newName);
+            return PrefabCollection<BuildingInfo>.FindLoaded(newName);
+        }
+
+        public static void CopyInfo(this BuildingInfo oldInfo, string newName)
         {
             int prefabCount = PrefabCollection<BuildingInfo>.LoadedCount();
-            if (++prefabCount <= UniqueBuildingsData.MAX_UNIQUE_COUNT)
+            if (++prefabCount <= Data.MAX_UNIQUE_COUNT)
             {
-                BuildingInfo oldPrefab = building.Info;
-                BuildingInfo newPrefab = Instantiate(oldPrefab);
+                BuildingInfo newInfo = Instantiate(oldInfo);
 
-                newPrefab.gameObject.name = newUniqueName;
-                newPrefab.gameObject.SetActive(false);
+                newInfo.gameObject.name = newName;
+                newInfo.gameObject.SetActive(false);
 
-                BuildingAI oldAI = newPrefab.GetComponent<BuildingAI>();
-                BuildingAI newAI = newPrefab.gameObject.AddComponent<BuildingAI>().GetCopyOf(oldAI);
-                Destroy(oldAI);
-
-                newPrefab.m_props = new BuildingInfo.Prop[oldPrefab.m_props.Length];
-                oldPrefab.m_props.CopyTo(newPrefab.m_props, 0);
-
-                PrefabCollection<BuildingInfo>.InitializePrefabs("Custom Assets", newPrefab, null);
-                PrefabCollection<BuildingInfo>.BindPrefabs();
-                BuildingInfo buildingInfo = PrefabCollection<BuildingInfo>.FindLoaded(newUniqueName);
-
-                foreach (FieldInfo fieldInfo in buildingInfo.GetType().GetFields(Flags))
-                {
-                    string fieldName = fieldInfo.Name;
-                    if (fieldName == "m_prefabDataIndex" || fieldName == "WidthCount" || fieldName == "LengthCount") continue;
-                    object newValue = oldPrefab.GetType().GetField(fieldName, Flags).GetValue(oldPrefab);
-                    if (fieldName == "m_buildingAI")
-                        newValue = newAI;
-                    buildingInfo.GetType().GetField(fieldName, Flags).SetValue(buildingInfo, newValue);
-                }
-
-                return buildingInfo;
+                PrefabCollection<BuildingInfo>.InitializePrefabs("Custom Assets", newInfo, null);
             }
             throw new Exception("Maximum number of prefab instances reached!");
+        }
+
+        public static void CopyFields(this BuildingInfo oldInfo, string newName)
+        {
+            BuildingInfo newInfo = PrefabCollection<BuildingInfo>.FindLoaded(newName);
+
+            if (newInfo == null) return;
+
+            BuildingAI oldAI = newInfo.GetComponent<BuildingAI>();
+            BuildingAI newAI = newInfo.gameObject.AddComponent<BuildingAI>().GetCopyOf(oldAI);
+            Destroy(oldAI);
+
+            newInfo.m_props = new BuildingInfo.Prop[oldInfo.m_props.Length];
+            oldInfo.m_props.CopyTo(newInfo.m_props, 0);
+
+            foreach (FieldInfo fieldInfo in newInfo.GetType().GetFields(Flags))
+            {
+                string fieldName = fieldInfo.Name;
+                if (fieldName == "m_prefabDataIndex" || fieldName == "WidthCount" || fieldName == "LengthCount") continue;
+                object newValue = oldInfo.GetType().GetField(fieldName, Flags).GetValue(oldInfo);
+                if (fieldName == "m_buildingAI")
+                    newValue = newAI;
+                newInfo.GetType().GetField(fieldName, Flags).SetValue(newInfo, newValue);
+            }
         }
     }
 }

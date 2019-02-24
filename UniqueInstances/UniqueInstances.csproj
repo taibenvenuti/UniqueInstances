@@ -68,27 +68,32 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controller\UniqueController.cs" />
-    <Compile Include="Controller\UniqueTool.cs" />
+    <Compile Include="Model\Trees\TreeInstancesData.cs" />
+    <Compile Include="Patching\BuildingInfoPatch.cs" />
+    <Compile Include="Presenter\Manager.cs" />
+    <Compile Include="TreeInfoPatch.cs" />
+    <Compile Include="View\UniqueInstancesTool.cs" />
+    <Compile Include="Model\Buildings\BuildingInstancesData.cs" />
+    <Compile Include="Model\Buildings\UniqueBuildingInstance.cs" />
+    <Compile Include="Model\Trees\UniqueTreeInstance.cs" />
     <Compile Include="Extensions\BuildingExtensions.cs" />
     <Compile Include="Extensions\ComponentExtension.cs" />
     <Compile Include="Extensions\Extensions.cs" />
     <Compile Include="Extensions\TreeExtensions.cs" />
-    <Compile Include="Data\Buildings\UniqueBuilding.cs" />
-    <Compile Include="Data\Buildings\UniqueBuildingInfo.cs" />
-    <Compile Include="Data\Buildings\UniqueBuildingsData.cs" />
-    <Compile Include="Data\Trees\UniqueTree.cs" />
-    <Compile Include="Data\Trees\UniqueTreeInfo.cs" />
-    <Compile Include="Data\Trees\UniqueTreesData.cs" />
-    <Compile Include="Data\UniqueData.cs" />
-    <Compile Include="Data\UniqueSaveGameData.cs" />
+    <Compile Include="Model\Buildings\UniqueBuilding.cs" />
+    <Compile Include="Model\Buildings\UniqueBuildingInfo.cs" />
+    <Compile Include="Model\Buildings\BuildingsData.cs" />
+    <Compile Include="Model\Trees\UniqueTree.cs" />
+    <Compile Include="Model\Trees\UniqueTreeInfo.cs" />
+    <Compile Include="Model\Trees\TreesData.cs" />
+    <Compile Include="Model\Data.cs" />
+    <Compile Include="Model\InstancesData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serialization\SerializableDataExtension.cs" />
-    <Compile Include="Serialization\Xml.cs" />
-    <Compile Include="UniqueMod.cs" />
+    <Compile Include="Serialization\Serializer.cs" />
+    <Compile Include="Mod.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="GUI\" />
     <Folder Include="Locale\" />
   </ItemGroup>
   <ItemGroup>

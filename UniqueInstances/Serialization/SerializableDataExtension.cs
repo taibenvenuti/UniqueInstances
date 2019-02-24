@@ -1,15 +1,13 @@
 ﻿using ICities;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using UniqueInstances.Controller;
-using UniqueInstances.Data;
 
-namespace UniqueInstances.Serialization
+namespace UniqueInstances
 {
     public class SerializableDataExtension : SerializableDataExtensionBase
     {
         private const string DATA_ID = "Unique_Instances_DATA";
-        public UniqueData Data { get => UniqueController.Instance.Data; set => UniqueController.Instance.Data = value; }
+        public InstancesData Data { get => Manager.Instance.InstancesData; set => Manager.Instance.InstancesData = value; }
 
         public override void OnSaveData()
         {
@@ -32,7 +30,7 @@ namespace UniqueInstances.Serialization
 
             using (var memoryStream = new MemoryStream(data))
             {
-                Data = binaryFormatter.Deserialize(memoryStream) as UniqueData;
+                Data = binaryFormatter.Deserialize(memoryStream) as InstancesData;
             }
         }
     }

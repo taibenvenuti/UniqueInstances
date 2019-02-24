@@ -1,47 +1,23 @@
 ﻿using ICities;
 using UnityEngine;
 using static UnityEngine.Object;
-using UniqueInstances.Controller;
-using UniqueInstances.Serialization;
 
 namespace UniqueInstances
 {
-    public class UniqueMod : LoadingExtensionBase, IUserMod
+    public class Mod : LoadingExtensionBase, IUserMod
     {
         public string Name => "Unique Instances";
         public string Description => "Allows customization of buildings and trees on a per-instance basis.";
         private const string UniqueName = "UniqueInstancesMod";
         private GameObject GameObject { get; set; }
         private bool Initialized;
-        private static Xml _settings;
-        public static Xml Settings
-        {
-            get
-            {
-                if (_settings == null)
-                {
-                    _settings = Xml.Load();
-                    if (_settings == null)
-                    {
-                        _settings = new Xml();
-                        _settings.Save();
-                    }
-                }
-                return _settings;
-            }
-            set
-            {
-                _settings = value;
-            }
-        }
 
         private void Load()
         {
-            if (Initialized || !LoadingManager.instance.m_loadingComplete) return;
+            if (Initialized) return;
             if (GameObject != null) Unload();
             GameObject = new GameObject(UniqueName);
-            UniqueController.Instance = GameObject.AddComponent<UniqueController>();
-            Debug.LogWarning("UniqueLoading");
+            GameObject.AddComponent<Manager>();
             Initialized = true;
         }
 
@@ -55,10 +31,11 @@ namespace UniqueInstances
             Initialized = false;
         }
 
-        public override void OnLevelLoaded(LoadMode mode)
+        public override void OnCreated(ILoading loading)
         {
-            base.OnLevelLoaded(mode);
-            Load();
+            base.OnCreated(loading);
+            if (loading.currentMode == AppMode.Game)
+                Load();
         }
 
         public override void OnReleased()

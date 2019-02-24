@@ -2,7 +2,7 @@
 using System.Reflection;
 using UnityEngine;
 
-namespace UniqueInstances.Extensions
+namespace UniqueInstances
 {
     public static partial class Extensions
     {
