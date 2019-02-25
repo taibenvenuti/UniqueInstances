@@ -18,6 +18,7 @@ namespace UniqueInstances
             if (GameObject != null) Unload();
             GameObject = new GameObject(UniqueName);
             GameObject.AddComponent<Manager>();
+            GameObject.SetActive(true);
             Initialized = true;
         }
 

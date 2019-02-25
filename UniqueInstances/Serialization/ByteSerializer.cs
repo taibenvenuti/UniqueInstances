@@ -40,26 +40,33 @@ namespace UniqueInstances
         internal static void Load()
         {
             string path = FilePath;
-            byte[] array = File.ReadAllBytes(path);
-            Data.SerializableInfos uniqueData = null;
-            using (MemoryStream memoryStream = new MemoryStream())
+            Data.SerializableInfos infosData = null;
+            if(File.Exists(FilePath))
             {
-                BinaryFormatter binaryFormatter = new BinaryFormatter();
-                try
+                using (MemoryStream memoryStream = new MemoryStream())
                 {
-                    memoryStream.Write(array, 0, array.Length);
-                    memoryStream.Seek(0L, SeekOrigin.Begin);
-                    uniqueData = (Data.SerializableInfos)binaryFormatter.Deserialize(memoryStream);
+                    BinaryFormatter binaryFormatter = new BinaryFormatter();
+                    try
+                    {
+                        byte[] array = File.ReadAllBytes(path);
+                        memoryStream.Write(array, 0, array.Length);
+                        memoryStream.Seek(0L, SeekOrigin.Begin);
+                        infosData = (Data.SerializableInfos)binaryFormatter.Deserialize(memoryStream);
+                    }
+                    catch (Exception exception)
+                    {
+                        Debug.LogWarning($"Exception caught: {exception}");
+                    }
+                    finally
+                    {
+                        if (infosData == null) InfosData = new Data.SerializableInfos(Manager.Instance.Data);
+                        else InfosData = infosData;
+                    }
                 }
-                catch (Exception exception)
-                {
-                    Debug.LogWarning(exception);
-                }
-                finally
-                {
-                    if (uniqueData == null) InfosData = new Data.SerializableInfos(Manager.Instance.Data);
-                    else InfosData = uniqueData;
-                }
+            }
+            else
+            {
+                Manager.Instance.Data = new Data();
             }
         }
     }

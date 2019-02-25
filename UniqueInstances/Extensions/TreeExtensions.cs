@@ -35,7 +35,7 @@ namespace UniqueInstances
 
                 PrefabCollection<TreeInfo>.InitializePrefabs("Custom Assets", newInfo, null);
             }
-            throw new Exception("Maximum number of prefab instances reached!");
+            else throw new Exception("Maximum number of prefab instances reached!");
         }
 
         public static void CopyFields(this TreeInfo oldInfo, string newName)

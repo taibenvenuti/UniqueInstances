@@ -8,6 +8,11 @@ namespace UniqueInstances
     {
         private Dictionary<uint, UniqueTreeInstance> Buffer { get; set; }
 
+        public TreeInstancesData()
+        {
+            Buffer = new Dictionary<uint, UniqueTreeInstance>();
+        }
+
         public bool Contains(uint treeID)
         {
             if (Buffer.ContainsKey(treeID))

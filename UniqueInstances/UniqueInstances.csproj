@@ -71,7 +71,7 @@
     <Compile Include="Model\Trees\TreeInstancesData.cs" />
     <Compile Include="Patching\BuildingInfoPatch.cs" />
     <Compile Include="Presenter\Manager.cs" />
-    <Compile Include="View\UniqueInstancesTool.cs" />
+    <Compile Include="View\UniqueTool.cs" />
     <Compile Include="Model\Buildings\BuildingInstancesData.cs" />
     <Compile Include="Model\Buildings\Items\UniqueBuildingInstance.cs" />
     <Compile Include="Model\Trees\Items\UniqueTreeInstance.cs" />

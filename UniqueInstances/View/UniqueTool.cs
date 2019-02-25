@@ -1,32 +1,43 @@
 ﻿using ColossalFramework;
 using ColossalFramework.Math;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 namespace UniqueInstances
 {
-    public class UniqueInstancesTool : ToolBase
+    public class UniqueTool : ToolBase
     {
-        private Ray MouseRay { get; set; }
         private float MouseRayLength { get; set; }
-        private Vector3 MouseRayRight { get; set; }
         private bool MouseLeftDown { get; set; }
-        private InstanceID HoverInstance { get; set; }
         private bool MouseRightDown { get; set; }
-        private Vector3 CachedPosition { get; set; }
-        private Randomizer Randomizer { get; set; }
-        private Vector3 MousePosition { get; set; }
         private bool MouseRayValid { get; set; }
-        private RaycastOutput RayOutput { get; set; }
-        public Color32 UniqueColor { get; set; } = new Color32(128, 0, 0,255);
-        public Color32 NormalColor { get; set; } = new Color32(0, 128, 0, 255);
+        private Ray MouseRay { get; set; }
+        private RaycastOutput RayOutput;
+        private InstanceID HoverInstance { get; set; }
+        private Vector3 MouseRayRight { get; set; }
+        private Vector3 CachedPosition { get; set; }
+        private Vector3 MousePosition { get; set; }
+        public Color32 UniqueColor { get; set; } = new Color32(255, 0, 0,255);
+        public Color32 NormalColor { get; set; } = new Color32(0, 255, 0, 255);
+
+        internal static void Create()
+        {
+            ToolsModifierControl.toolController.gameObject.AddComponent<UniqueTool>();
+        }
+
+        internal static void Destroy()
+        {
+            Destroy(ToolsModifierControl.toolController.gameObject.GetComponent<UniqueTool>());
+        }
 
         protected override void Awake()
         {
             base.Awake();
 
-            Randomizer = new Randomizer((int)DateTime.Now.Ticks);
-            Debug.Log("Tool ready...");
+            Install();
         }
 
         protected override void OnEnable()
@@ -44,13 +55,14 @@ namespace UniqueInstances
 
         public override void SimulationStep()
         {
-            Debug.LogWarning("SimulationStep");
+            ToolBase.RaycastInput input = new ToolBase.RaycastInput
+            {
+                m_ray = MouseRay,
+                m_length = MouseRayLength,
+                m_rayRight = MouseRayRight
+            };
 
-            ToolBase.RaycastInput input = new ToolBase.RaycastInput(MouseRay, MouseRayLength);
-
-            input.m_rayRight = MouseRayRight;
-
-            if (ToolBase.RayCast(input, out ToolBase.RaycastOutput RayOutput))
+            if (ToolBase.RayCast(input, out RayOutput))
             {
                 MousePosition = RayOutput.m_hitPos;
 
@@ -87,9 +99,9 @@ namespace UniqueInstances
         {
             if (!MouseRayValid) return;
 
-            if (MouseLeftDown)
+            if (MouseLeftDown && !Manager.Instance.IsUnique(HoverInstance))
                 Manager.Instance.MakeUnique(HoverInstance, true);
-            else if (MouseRightDown)
+            else if (MouseRightDown && Manager.Instance.IsUnique(HoverInstance))
                 Manager.Instance.MakeUnique(HoverInstance, false);
         }
 
@@ -133,15 +145,15 @@ namespace UniqueInstances
                 else if (HoverInstance.Tree != 0)
                 {
                     show = true;
-                    text = "Test tree message.";
+                    text = "Test tree message...";
                 }
                 if (show)
                 {
-                    base.ShowExtraInfo(true, text, CachedPosition);
+                    base.ShowToolInfo(true, text, CachedPosition);
                 }
-                else base.ShowExtraInfo(false, null, CachedPosition);
+                else base.ShowToolInfo(false, null, CachedPosition);
             }
-            else base.ShowExtraInfo(false, null, CachedPosition);
+            else base.ShowToolInfo(false, null, CachedPosition);
         }
 
         protected override void OnToolLateUpdate()
@@ -292,6 +304,43 @@ namespace UniqueInstances
         private Color GetOverlayColor()
         {
             return Manager.Instance.IsUnique(HoverInstance) ? UniqueColor : NormalColor;
+        }
+
+        private void Install()
+        {
+            try
+            {
+                FieldInfo fieldInfo = typeof(ToolController).GetField("m_tools", BindingFlags.Instance | BindingFlags.NonPublic);
+                ToolBase[] tools = (ToolBase[])fieldInfo.GetValue(ToolsModifierControl.toolController);
+                int initialLength = tools.Length;
+                Array.Resize(ref tools, initialLength + 1);
+                Dictionary<Type, ToolBase> dictionary = (Dictionary<Type, ToolBase>)typeof(ToolsModifierControl).GetField("m_Tools", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+                dictionary.Add(typeof(UniqueTool), this);
+                tools[initialLength] = this;
+                fieldInfo.SetValue(ToolsModifierControl.toolController, tools);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning($"Exception caught: {exception}");
+            }
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            try
+            {
+                FieldInfo fieldInfo = typeof(ToolController).GetField("m_tools", BindingFlags.Instance | BindingFlags.NonPublic);
+                List<ToolBase> tools = ((ToolBase[])fieldInfo.GetValue(ToolsModifierControl.toolController)).ToList();
+                tools.Remove(this);
+                fieldInfo.SetValue(ToolsModifierControl.toolController, tools.ToArray());
+                Dictionary<Type, ToolBase> dictionary = (Dictionary<Type, ToolBase>)typeof(ToolsModifierControl).GetField("m_Tools", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+                dictionary.Remove(typeof(UniqueTool));
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning($"Exception caught: {exception}");
+            }
         }
     }
 }

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Threading;
 using UnityEngine;
-using System.Reflection;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace UniqueInstances
 {
@@ -11,7 +8,6 @@ namespace UniqueInstances
     {
         public static Manager Instance;
         public Data Data { get; set; }
-        private UniqueInstancesTool Tool { get; set; }
         private bool Active { get; set; }
         private object PrefabLock { get; set; }
 
@@ -19,16 +15,15 @@ namespace UniqueInstances
         {
             Instance = this;
             PrefabLock = new object();
+            UniqueTool.Create();
             ByteSerializer.Load();
-            InstallTool();
             InitializeData();
         }
 
         void OnDestroy()
         {
-            UninstallTool();
+            UniqueTool.Destroy();
         }
-
         //TODO Name/Desc input UI
         internal void MakeUnique(InstanceID hoverInstance, bool create)
         {
@@ -77,31 +72,6 @@ namespace UniqueInstances
                 return Data.ContainsInstance(instanceID.Tree);
             return false;
         }
-
-        private void InstallTool()
-        {
-            Tool = ToolsModifierControl.toolController.gameObject.AddComponent<UniqueInstancesTool>();
-            FieldInfo fieldInfo = typeof(ToolController).GetField("m_tools", BindingFlags.Instance | BindingFlags.NonPublic);
-            ToolBase[] tools = (ToolBase[])fieldInfo.GetValue(ToolsModifierControl.toolController);
-            int initialLength = tools.Length;
-            Array.Resize(ref tools, initialLength + 1);
-            Dictionary<Type, ToolBase> dictionary = (Dictionary<Type, ToolBase>)typeof(ToolsModifierControl).GetField("m_Tools", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
-            dictionary.Add(typeof(UniqueInstancesTool), Tool);
-            tools[initialLength] = Tool;
-            fieldInfo.SetValue(ToolsModifierControl.toolController, tools);
-        }
-
-        private void UninstallTool()
-        {
-            FieldInfo fieldInfo = typeof(ToolController).GetField("m_tools", BindingFlags.Instance | BindingFlags.NonPublic);
-            List<ToolBase> tools = ((ToolBase[])fieldInfo.GetValue(ToolsModifierControl.toolController)).ToList();
-            tools.Remove(Tool);
-            fieldInfo.SetValue(ToolsModifierControl.toolController, tools.ToArray());
-            Dictionary<Type, ToolBase> dictionary = (Dictionary<Type, ToolBase>)typeof(ToolsModifierControl).GetField("m_Tools", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
-            dictionary.Remove(typeof(UniqueInstancesTool));
-            Destroy(ToolsModifierControl.toolController.gameObject.GetComponent<UniqueInstancesTool>());
-        }
-
 
         public void InitializeData()
         {
